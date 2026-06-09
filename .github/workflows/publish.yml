@@ -46,7 +46,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Idempotency guard: if this version is already on npm (e.g. a re-run or a
+      # stale tag), skip publishing instead of failing with "cannot publish over".
+      - name: Check if version already published
+        id: check
+        run: |
+          V=$(node -p "require('./package.json').version")
+          if npm view "n8n-nodes-goodsender@$V" version >/dev/null 2>&1; then
+            echo "n8n-nodes-goodsender@$V is already on npm — skipping publish."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Release
+        if: steps.check.outputs.skip == 'false'
         # n8n-node release builds, lints, and publishes with --provenance.
         # OIDC: leave NPM_TOKEN unset. Token: set NPM_TOKEN and it is used below.
         run: |
