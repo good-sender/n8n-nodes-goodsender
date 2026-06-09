@@ -10,6 +10,8 @@ export class GoodSenderApi implements ICredentialType {
 
 	displayName = 'GoodSender API';
 
+	icon = 'file:goodsender.svg' as const;
+
 	documentationUrl = 'https://goodsender.com/docs/api-reference/';
 
 	properties: INodeProperties[] = [

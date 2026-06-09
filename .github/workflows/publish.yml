@@ -1,46 +1,56 @@
-# Publishes the package to npm with provenance whenever a GitHub Release is published.
+# Publishes this n8n community node to npm with provenance on every version tag push.
 #
-# Auth uses npm Trusted Publishing (OIDC) — no NPM_TOKEN secret to store or rotate.
-# One-time setup (after the package exists on npm):
-#   npmjs.com -> the package -> Settings -> Trusted Publisher -> add:
-#     repository:  good-sender/n8n-nodes-goodsender
-#     workflow:    publish.yml
+# Required by n8n for verified community nodes (provenance mandatory since 2026-05-01).
+# Provenance lets anyone cryptographically verify the package was built by this exact
+# workflow, from this exact repo and commit. Requires @n8n/node-cli >= 0.23.0.
 #
-# Token fallback (if you prefer a token over Trusted Publishing): add an NPM_TOKEN
-# repo secret (Automation type) and set `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}`
-# as env on the publish step. Then Trusted Publisher config is not required.
-name: Publish (provenance)
+# One-time setup — OIDC Trusted Publishing (recommended, no secrets):
+#   npmjs.com -> the package -> Settings -> Publish access -> Trusted Publishers -> Add:
+#     Repository owner: good-sender
+#     Repository name:  n8n-nodes-goodsender
+#     Workflow name:    publish.yml
+#   Leave NPM_TOKEN unset; GitHub's OIDC token is used instead.
+#
+# Token fallback: set an NPM_TOKEN repo secret (granular, read+write to this package).
+#
+# Release process — run locally:
+#   npm run release
+# This lints, builds, prompts for a version bump, commits, tags, and pushes —
+# which triggers this workflow to publish.
+name: Publish
 
 on:
-  release:
-    types: [published]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  id-token: write # required for npm provenance / Trusted Publishing
+  push:
+    tags:
+      - '*.*.*'
+      - 'v*.*.*'
 
 jobs:
   publish:
+    name: Publish to npm
     runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write # required to mint an OIDC token for npm provenance
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 'lts/*'
+          cache: 'npm'
 
-      # Trusted Publishing (OIDC) requires npm >= 11.5.1; Node 20 ships npm 10.
-      - run: npm install -g npm@latest
+      - name: Install dependencies
+        run: npm ci
 
-      # --ignore-scripts skips native build scripts of transitive deps (e.g.
-      # n8n-workflow -> isolated-vm, which needs Node 22+ and isn't used here).
-      # We only need n8n-workflow's type declarations to compile and lint.
-      - run: npm ci --ignore-scripts
-
-      - run: npm run build
-
-      - run: npm run lint
-
-      - run: npm publish --provenance --access public
+      - name: Release
+        # n8n-node release builds, lints, and publishes with --provenance.
+        # OIDC: leave NPM_TOKEN unset. Token: set NPM_TOKEN and it is used below.
+        run: |
+          [ -n "$NPM_TOKEN" ] && npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
+          npm run release
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -102,6 +102,55 @@ Read endpoints for branching on consent state and inspecting domains. `List Cons
 
 _(placeholder — add UI screenshots of the credential dialog and the Send Template Email node here)_
 
+## Example workflow
+
+A minimal **Manual Trigger → GoodSender (Send Template Email)** workflow. In n8n, open a new
+workflow, press `Ctrl/Cmd+V` to paste this JSON onto the canvas, then open the GoodSender node and
+select your **GoodSender API** credential. Edit `fromEmail` to an address on a domain you've
+verified in GoodSender.
+
+```json
+{
+  "name": "GoodSender — Send OTP",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "When clicking Test",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "resource": "email",
+        "operation": "sendTemplate",
+        "fromEmail": "you@your-domain.com",
+        "toEmail": "recipient@example.com",
+        "subject": "Your verification code",
+        "templateId": "otp_code",
+        "app_name": "MyApp",
+        "otp_code": "482916",
+        "expiry_minutes": "10"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "GoodSender",
+      "type": "n8n-nodes-goodsender.goodSender",
+      "typeVersion": 1,
+      "position": [240, 0],
+      "credentials": {
+        "goodSenderApi": { "id": "1", "name": "GoodSender account" }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking Test": {
+      "main": [[{ "node": "GoodSender", "type": "main", "index": 0 }]]
+    }
+  }
+}
+```
+
 ---
 
 ## API notes & corrections

@@ -1,3 +1,4 @@
+import { NodeConnectionTypes } from 'n8n-workflow';
 import type {
 	IDataObject,
 	IExecuteSingleFunctions,
@@ -174,11 +175,12 @@ export class GoodSender implements INodeType {
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description: 'Send transactional, custom, and consent emails through GoodSender',
+		usableAsTool: true,
 		defaults: {
 			name: 'GoodSender',
 		},
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
 				name: 'goodSenderApi',
@@ -217,38 +219,6 @@ export class GoodSender implements INodeType {
 				},
 				options: [
 					{
-						name: 'Send Template Email',
-						value: 'sendTemplate',
-						action: 'Send a transactional template email',
-						description:
-							'Send a predefined transactional template instantly to any recipient. Bypasses the Permission Loop — no consent required.',
-						routing: {
-							request: { method: 'POST', url: '/v1/emails/template' },
-							send: { preSend: [buildTemplateBody] },
-						},
-					},
-					{
-						name: 'Send Custom Email',
-						value: 'sendCustom',
-						action: 'Send a custom email',
-						description:
-							'Send a custom email. Consent-gated: held until the recipient approves via the Permission Loop, so delivery is NOT guaranteed to be immediate. Only granted, active recipients are delivered; others are declined.',
-						routing: {
-							request: { method: 'POST', url: '/v1/emails/send' },
-							send: { preSend: [buildCustomBody] },
-						},
-					},
-					{
-						name: 'Request Consent',
-						value: 'requestConsent',
-						action: 'Request recipient consent',
-						description: 'Ask a recipient to approve future custom email from your domain',
-						routing: {
-							request: { method: 'POST', url: '/v1/emails/consent' },
-							send: { preSend: [buildConsentBody] },
-						},
-					},
-					{
 						name: 'Get Consent Status',
 						value: 'getConsent',
 						action: 'Get a recipient consent status',
@@ -276,6 +246,38 @@ export class GoodSender implements INodeType {
 						description: 'List sender domains and their DNS verification state',
 						routing: {
 							request: { method: 'GET', url: '/v1/domains' },
+						},
+					},
+					{
+						name: 'Request Consent',
+						value: 'requestConsent',
+						action: 'Request recipient consent',
+						description: 'Ask a recipient to approve future custom email from your domain',
+						routing: {
+							request: { method: 'POST', url: '/v1/emails/consent' },
+							send: { preSend: [buildConsentBody] },
+						},
+					},
+					{
+						name: 'Send Custom Email',
+						value: 'sendCustom',
+						action: 'Send a custom email',
+						description:
+							'Send a custom email. Consent-gated: held until the recipient approves via the Permission Loop, so delivery is NOT guaranteed to be immediate. Only granted, active recipients are delivered; others are declined.',
+						routing: {
+							request: { method: 'POST', url: '/v1/emails/send' },
+							send: { preSend: [buildCustomBody] },
+						},
+					},
+					{
+						name: 'Send Template Email',
+						value: 'sendTemplate',
+						action: 'Send a transactional template email',
+						description:
+							'Send a predefined transactional template instantly to any recipient. Bypasses the Permission Loop — no consent required.',
+						routing: {
+							request: { method: 'POST', url: '/v1/emails/template' },
+							send: { preSend: [buildTemplateBody] },
 						},
 					},
 				],
@@ -727,8 +729,8 @@ export class GoodSender implements INodeType {
 					show: { resource: ['email'], operation: ['sendCustom'] },
 				},
 				options: [
-					{ name: 'Markdown', value: 'markdown' },
 					{ name: 'HTML', value: 'html' },
+					{ name: 'Markdown', value: 'markdown' },
 					{ name: 'Text', value: 'text' },
 				],
 			},
