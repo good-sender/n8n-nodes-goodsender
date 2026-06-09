@@ -1,0 +1,43 @@
+# Publishes the package to npm with provenance whenever a GitHub Release is published.
+#
+# Auth uses npm Trusted Publishing (OIDC) — no NPM_TOKEN secret to store or rotate.
+# One-time setup (after the package exists on npm):
+#   npmjs.com -> the package -> Settings -> Trusted Publisher -> add:
+#     repository:  good-sender/n8n-nodes-goodsender
+#     workflow:    publish.yml
+#
+# Token fallback (if you prefer a token over Trusted Publishing): add an NPM_TOKEN
+# repo secret (Automation type) and set `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}`
+# as env on the publish step. Then Trusted Publisher config is not required.
+name: Publish (provenance)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # required for npm provenance / Trusted Publishing
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Trusted Publishing (OIDC) requires npm >= 11.5.1; Node 20 ships npm 10.
+      - run: npm install -g npm@latest
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - run: npm run lint
+
+      - run: npm publish --provenance --access public
