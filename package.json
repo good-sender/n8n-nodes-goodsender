@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-goodsender",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "n8n community node to send transactional templates, custom (consent-gated) email, and consent requests through GoodSender.",
   "keywords": [
     "n8n-community-node-package",
