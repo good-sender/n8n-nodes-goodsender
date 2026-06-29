@@ -1,0 +1,61 @@
+# Uniform task intake. Place at: <repo>/.github/ISSUE_TEMPLATE/task.yml
+# Makes human-created issues match agent-created ones. NOTE: GitHub Issue Forms
+# can't set Project fields — after creation, add to the board and set
+# Priority + Status=Todo (use scripts/add-task.sh, or a Project automation).
+name: Task
+description: A uniform work item for the autonomous dev loop
+title: "<short imperative title>"
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / why
+      description: 1–2 sentences.
+    validations: { required: true }
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options: [feature, fix, tech-debt, infra, docs]
+    validations: { required: true }
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: P0 now/blocks others · P1 foundations · P2 features · P3 cleanup
+      options: [P0, P1, P2, P3]
+    validations: { required: true }
+  - type: input
+    id: repos
+    attributes:
+      label: Affected repo(s)
+      description: Mark the primary / source-of-truth repo.
+    validations: { required: true }
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria (testable)
+      value: "- [ ] "
+    validations: { required: true }
+  - type: dropdown
+    id: breaking
+    attributes:
+      label: Backwards-incompatible API/SQL change?
+      description: If yes, it must ship coordinated across ALL consumers (golden rule #2).
+      options:
+        - "no"
+        - "YES — ships coordinated across all consumers"
+    validations: { required: true }
+  - type: input
+    id: blocked_by
+    attributes:
+      label: Depends on / blocked by
+      description: Issue/PR refs, or leave blank.
+  - type: textarea
+    id: links
+    attributes:
+      label: Links / references
+  - type: textarea
+    id: notes
+    attributes:
+      label: Out of scope / notes
