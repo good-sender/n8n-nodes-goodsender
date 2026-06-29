@@ -13,9 +13,16 @@ WT_DIR="${REPO_ROOT}/../${REPO_NAME}--${SAFE}"
 
 [ -e "$WT_DIR" ] && { echo "error: $WT_DIR already exists" >&2; exit 1; }
 
-git -C "$REPO_ROOT" worktree add "$WT_DIR" -b "$BRANCH"
+# Always base the new branch on the up-to-date DEFAULT branch (not whatever is
+# currently checked out), so feature branches never accidentally fork off another
+# feature branch. Resolve the default branch from origin/HEAD (fallback: main).
+DEFAULT="$(git -C "$REPO_ROOT" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@')"
+DEFAULT="${DEFAULT:-main}"
+git -C "$REPO_ROOT" fetch -q origin "$DEFAULT"
+
+git -C "$REPO_ROOT" worktree add "$WT_DIR" -b "$BRANCH" "origin/$DEFAULT"
 echo
 echo "Worktree:  $WT_DIR"
-echo "Branch:    $BRANCH"
+echo "Branch:    $BRANCH  (based on origin/$DEFAULT)"
 echo "Next:      cd '$WT_DIR' → install deps → run baseline gates before changes."
 echo "Cleanup:   git -C '$REPO_ROOT' worktree remove '$WT_DIR'"
