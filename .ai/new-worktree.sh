@@ -16,8 +16,8 @@ WT_DIR="${REPO_ROOT}/../${REPO_NAME}--${SAFE}"
 # Always base the new branch on the up-to-date DEFAULT branch (not whatever is
 # currently checked out), so feature branches never accidentally fork off another
 # feature branch. Resolve the default branch from origin/HEAD (fallback: main).
-DEFAULT="$(git -C "$REPO_ROOT" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@')"
-DEFAULT="${DEFAULT:-main}"
+DEFAULT="$(git -C "$REPO_ROOT" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@' || true)"
+DEFAULT="${DEFAULT:-main}"   # fallback when origin/HEAD isn't set (|| true so set -e doesn't abort)
 git -C "$REPO_ROOT" fetch -q origin "$DEFAULT"
 
 git -C "$REPO_ROOT" worktree add "$WT_DIR" -b "$BRANCH" "origin/$DEFAULT"
