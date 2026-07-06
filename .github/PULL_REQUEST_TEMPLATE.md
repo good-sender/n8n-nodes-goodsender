@@ -2,7 +2,7 @@
 
 ## Related issues
 <!-- REQUIRED — always fill; write "none" where nothing applies. -->
-- **Closes:** #<n>   <!-- issue(s) this PR closes on merge → moves the board card to Done. Use real `Closes #N` so GitHub links it. -->
+- Closes #<n>   <!-- issue(s) this PR closes on merge → moves the board card to Done. MUST stay the plain `Closes #N` form: bold/colon variants like `**Closes:** #N` are NOT parsed by GitHub and the card silently never moves. -->
 - **Part of / relates to:** #<n>   <!-- epic or related issues this PR does NOT close -->
 - **Opens:** #<n>   <!-- follow-up issues this work created (deferred scope, tech-debt found). Open them and list here. -->
 
